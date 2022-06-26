@@ -1,7 +1,8 @@
 ﻿using IoContainer;
+using Console;
 
 
-var services = ServiceProvider.InitServices();
+var services = ServiceCollection.InitServices();
 var container = services.InitContainer();
 
 

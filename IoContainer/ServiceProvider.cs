@@ -3,12 +3,12 @@ using IoContainer.Concrete;
 
 namespace IoContainer
 {
-    public class ServiceProvider
+    public class ServiceCollection : IServiceCollection
     {
-        private static Abstract.IServiceProvider _instance;
+        private static IServiceCollection _instance;
         private ServiceContainer _containerInstance;
 
-        private ServiceProvider()
+        private ServiceCollection()
         {
             
         }
@@ -22,28 +22,15 @@ namespace IoContainer
             return this._containerInstance;
         }
 
-        public static Abstract.IServiceProvider InitServices()
+        public static IServiceCollection InitServices()
         {
             if (_instance == null)
             {
-                _instance = (Abstract.IServiceProvider)new ServiceProvider();
+                _instance = new ServiceCollection();
             }
             return _instance;
         }
-        public void RegisterAsSingleton<TSource, TService>() where TService : TSource, new()
-        {
-            var descriptors = _containerInstance.GetDescriptors();
-            bool IsExist = descriptors.Any(descriptor => descriptor.ImplementationType == typeof(TService) && descriptor.SourceType == typeof(TSource));
-
-            if (IsExist)
-            {
-                System.Console.WriteLine("Service Provider : This service has already registered !");
-            }
-            else
-            {
-                descriptors.Add(new ServiceDescriptor(typeof(TService), typeof(TSource)));
-            }
-        }
+        
         public void RegisterAsSingeleton<TService>() where TService : class, new()
         {
             var descriptors = _containerInstance.GetDescriptors();
@@ -56,6 +43,21 @@ namespace IoContainer
             else
             {
                 descriptors.Add(new ServiceDescriptor(typeof(TService)));
+            }
+        }
+
+        public void RegisterAsSingleton<TSource, TService>() where TService : class, TSource
+        {
+            var descriptors = _containerInstance.GetDescriptors();
+            bool IsExist = descriptors.Any(descriptor => descriptor.ImplementationType == typeof(TService) && descriptor.SourceType == typeof(TSource));
+
+            if (IsExist)
+            {
+                System.Console.WriteLine("Service Provider : This service has already registered !");
+            }
+            else
+            {
+                descriptors.Add(new ServiceDescriptor(typeof(TService), typeof(TSource)));
             }
         }
     }
