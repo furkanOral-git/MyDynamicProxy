@@ -1,5 +1,6 @@
 using IoContainer.Abstract;
 using System.Reflection;
+using System;
 
 namespace IoContainer.Concrete
 {
@@ -17,7 +18,7 @@ namespace IoContainer.Concrete
         public TSource GetServiceAsSingleton<TSource>() where TSource : class
         {
             var descriptor = Descriptors.SingleOrDefault(descriptor => descriptor.ImplementationType == typeof(TSource) || descriptor.SourceType == typeof(TSource));
-            var descriptorImpParamaterTypes = descriptor.ImplementationType.GetConstructors()[0].GetParameters().Select(param => param.GetType()).ToArray();
+            var descriptorImpParamaterTypes = descriptor.ImplementationType.GetConstructors()[0].GetParameters().Select(param=>param.ParameterType).ToArray();
             object[] descriptorImpParameterObject = null;
 
             if (descriptorImpParamaterTypes.Length != 0)
