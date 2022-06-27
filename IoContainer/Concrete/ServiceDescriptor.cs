@@ -8,14 +8,15 @@ namespace IoContainer.Concrete
         public Type ImplementationType { get; set; }
         public Type? SourceType { get; set; }
 
-        public ServiceDescriptor(Type implementationType, Type? sourceType = null)
+        public ServiceDescriptor(Type implementationType,Type sourceType) 
         {
             ImplementationType = implementationType;
-
-            if (sourceType != null)
-            {
-                SourceType = sourceType;
-            }
+            SourceType = sourceType;
+        }
+        
+        // Don't repeat yourself
+        public ServiceDescriptor(Type implementationType) : this(implementationType,implementationType)
+        {
             
         }
 
