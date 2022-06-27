@@ -9,6 +9,6 @@ namespace IoContainer.Abstract
     {
         public IServiceContainer InitContainer();
         public void RegisterAsSingleton<TSource, TService>() where TService : class, TSource;
-        public void RegisterAsSingeleton<TService>() where TService : class, new();
+        public void RegisterAsSingleton<TService>() where TService : class, new();
     }
 }
