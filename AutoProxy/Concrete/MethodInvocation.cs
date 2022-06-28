@@ -1,10 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
+using AutoProxy.Abstract;
 
-namespace AutoProxy
+namespace AutoProxy.Concrete
 {
     public class MethodInvocation : IMethodInvocation
     {

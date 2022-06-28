@@ -1,9 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using AutoProxy.Abstract;
 
-namespace AutoProxy
+namespace AutoProxy.Concrete
 {
     public abstract class MethodInterceptor : AbstractInterceptorBase
     {
@@ -41,6 +38,7 @@ namespace AutoProxy
                 }
 
             }
+            OnAfter(method);
             if (HasResultObject == true)
             {
                 return result;
@@ -49,7 +47,7 @@ namespace AutoProxy
             {
                 return default;
             }
-            OnAfter(method);
+            
         }
     }
 }

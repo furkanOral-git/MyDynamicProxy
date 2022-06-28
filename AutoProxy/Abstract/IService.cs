@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace IoContainer.Abstract
+namespace AutoProxy.Abstract
 {
     public interface IService
     {

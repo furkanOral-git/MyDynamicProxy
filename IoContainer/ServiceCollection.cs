@@ -31,10 +31,10 @@ namespace IoContainer
             return _instance;
         }
         
-        public void RegisterAsSingeleton<TService>() where TService : class, new()
+        public void RegisterAsSingleton<TService>() where TService : class, new()
         {
             var descriptors = _containerInstance.GetDescriptors();
-            bool IsExist = descriptors.Any(descriptor => descriptor.ImplementationType == typeof(TService));
+            bool IsExist = descriptors.Any(descriptor => descriptor.ImplementationType == typeof(TService) && descriptor.SourceType == typeof(TService));
 
             if (IsExist)
             {
@@ -53,7 +53,7 @@ namespace IoContainer
 
             if (IsExist)
             {
-                System.Console.WriteLine("Service Provider : This service has already registered !");
+                System.Console.WriteLine("Service Provider : This service has already registered as singleton !");
             }
             else
             {

@@ -1,4 +1,5 @@
 using IoContainer.Abstract;
+using AutoProxy;
 using System.Reflection;
 using System;
 
@@ -42,22 +43,27 @@ namespace IoContainer.Concrete
         {
             return Descriptors;
         }
+        //This method only fill Implementation. It'll not produce instance as transient
         private object GetServiceBase(Type SourceType, object[]? param = null)
         {
-
+            var proxyFactory = AutoProxyFactory.GetFactory();
             var descriptor = Descriptors.SingleOrDefault(descriptor => descriptor.SourceType == SourceType || descriptor.ImplementationType == SourceType);
-
+            //var Methods = descriptor.ImplementationType.GetMethods().Where(method=>method.DeclaringType == descriptor.ImplementationType);
             if (descriptor.Implementation == null)
             {
                 if (param != null)
                 {
+                    //AutoProxy'll integrate from here
                     descriptor.Implementation = Activator.CreateInstance(descriptor.ImplementationType, param);
-                    return descriptor.Implementation;
+                    var proxyObject = proxyFactory.CreateProxy(descriptor);
+                    //it'll return proxy object as descriptor.Implementation
+                    return proxyObject;
                 }
                 else
                 {
                     descriptor.Implementation = Activator.CreateInstance(descriptor.ImplementationType);
-                    return descriptor.Implementation;
+                    var proxyObject = proxyFactory.CreateProxy(descriptor);
+                    return proxyObject;
                 }
 
             }

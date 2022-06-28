@@ -1,3 +1,5 @@
+using AutoProxy.Abstract;
+using AutoProxy.Concrete;
 using IoContainer.Abstract;
 
 namespace IoContainer.Concrete
@@ -6,7 +8,8 @@ namespace IoContainer.Concrete
     {
         public object Implementation { get; set; }
         public Type ImplementationType { get; set; }
-        public Type? SourceType { get; set; }
+        public Type SourceType { get; set; }
+        internal List<MethodInvocation> Invocations {get;set;}
 
         public ServiceDescriptor(Type implementationType,Type sourceType) 
         {
