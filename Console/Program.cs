@@ -10,5 +10,6 @@ services.RegisterAsSingleton<IProductService,ProductManager>();
 
 var ProductManager = container.GetServiceAsSingleton<IProductService>();
 
-ProductManager.AddProduct();
+Product product = new Product("Mavi Kalem");
+ProductManager.AddProduct(product);
 

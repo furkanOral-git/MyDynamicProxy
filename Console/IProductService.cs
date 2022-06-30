@@ -7,7 +7,7 @@ namespace Console
 {
     public interface IProductService
     {
-        void AddProduct();
+        void AddProduct(Product product);
         
     }
 }
