@@ -4,7 +4,7 @@ using IoContainer.Abstract;
 
 namespace IoContainer.Concrete
 {
-    internal class ServiceDescriptor : IService
+    internal class ServiceDescriptor 
     {
         public object Implementation { get; set; }
         public Type ImplementationType { get; set; }

@@ -55,14 +55,14 @@ namespace IoContainer.Concrete
                 {
                     //AutoProxy'll integrate from here
                     descriptor.Implementation = Activator.CreateInstance(descriptor.ImplementationType, param);
-                    var proxyObject = proxyFactory.CreateProxy(descriptor);
+                    var proxyObject = proxyFactory.CreateProxy(descriptor.Implementation,descriptor.SourceType);
                     //it'll return proxy object as descriptor.Implementation
                     return proxyObject;
                 }
                 else
                 {
                     descriptor.Implementation = Activator.CreateInstance(descriptor.ImplementationType);
-                    var proxyObject = proxyFactory.CreateProxy(descriptor);
+                    var proxyObject = proxyFactory.CreateProxy(descriptor.Implementation,descriptor.SourceType);
                     return proxyObject;
                 }
 
