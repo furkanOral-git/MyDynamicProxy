@@ -2,12 +2,12 @@ using AutoProxy.Abstract;
 
 namespace AutoProxy.Concrete
 {
-    public abstract class MethodInterceptor : AbstractInterceptorBase
+    public  class MethodInterceptor : AbstractInterceptorBase
     {
-        protected abstract void OnBefore(IMethodInvocation method);
-        protected abstract void OnSucces(IMethodInvocation method);
-        protected abstract void OnException(IMethodInvocation method, Exception e);
-        protected abstract void OnAfter(IMethodInvocation method);
+        protected virtual void OnBefore(IMethodInvocation method){}
+        protected virtual void OnSucces(IMethodInvocation method){}
+        protected virtual void OnException(IMethodInvocation method, Exception e){}
+        protected virtual void OnAfter(IMethodInvocation method){}
 
         public override object? Intercept(IMethodInvocation method)
         {
