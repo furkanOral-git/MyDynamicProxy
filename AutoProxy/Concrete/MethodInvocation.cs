@@ -5,8 +5,8 @@ namespace AutoProxy.Concrete
 {
     public class MethodInvocation : IMethodInvocation
     {
-        public MethodInfo Method { get; set; }
-        public object DeclaringObject { get; set; }
+        public MethodInfo Method { get; init; }
+        public object DeclaringObject { get; init; }
         public object[] MethodParameterObjects { get; set; }
 
         public MethodInvocation(MethodInfo method,object declaringObject,object[]? parameterObjects = null)

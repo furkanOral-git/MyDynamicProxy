@@ -16,7 +16,7 @@ namespace Console
         public void AddProduct(Product product)
         {
             ProductService.AddToDatabase();
-            System.Console.WriteLine($"Ürün eklendi... {product.Description}");
+            System.Console.WriteLine($"Ürün eklendi...");
         }
     }
 }

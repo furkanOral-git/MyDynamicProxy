@@ -7,9 +7,8 @@ namespace IoContainer.Concrete
     internal class ServiceDescriptor 
     {
         public object Implementation { get; set; }
-        public Type ImplementationType { get; set; }
-        public Type SourceType { get; set; }
-        internal List<MethodInvocation> Invocations {get;set;}
+        public Type ImplementationType { get; init; }
+        public Type SourceType { get; init; }
 
         public ServiceDescriptor(Type implementationType,Type sourceType) 
         {

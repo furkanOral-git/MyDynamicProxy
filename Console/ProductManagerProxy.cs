@@ -1,4 +1,5 @@
-using AutoProxy.Tools;
+using AutoProxy.Concrete;
+
 
 namespace Console
 {

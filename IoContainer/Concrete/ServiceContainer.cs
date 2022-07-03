@@ -11,15 +11,12 @@ namespace IoContainer.Concrete
 
         public ServiceContainer()
         {
-            if (Descriptors == null)
-            {
-                Descriptors = new List<ServiceDescriptor>();
-            }
+            Descriptors = new List<ServiceDescriptor>();
         }
         public TSource GetServiceAsSingleton<TSource>() where TSource : class
         {
             var descriptor = Descriptors.SingleOrDefault(descriptor => descriptor.ImplementationType == typeof(TSource) || descriptor.SourceType == typeof(TSource));
-            var descriptorImpParamaterTypes = descriptor.ImplementationType.GetConstructors()[0].GetParameters().Select(param=>param.ParameterType).ToArray();
+            var descriptorImpParamaterTypes = descriptor.ImplementationType.GetConstructors()[0].GetParameters().Select(param => param.ParameterType).ToArray();
             object[] descriptorImpParameterObject = null;
 
             if (descriptorImpParamaterTypes.Length != 0)
@@ -31,7 +28,7 @@ namespace IoContainer.Concrete
                     var instance = GetServiceBase(descriptorImpParamaterTypes[i]);
                     descriptorImpParameterObject[i] = instance;
                 }
-                return (TSource)GetServiceBase(typeof(TSource),descriptorImpParameterObject);
+                return (TSource)GetServiceBase(typeof(TSource), descriptorImpParameterObject);
             }
             else
             {
@@ -55,14 +52,14 @@ namespace IoContainer.Concrete
                 {
                     //AutoProxy'll integrate from here
                     descriptor.Implementation = Activator.CreateInstance(descriptor.ImplementationType, param);
-                    var proxyObject = proxyFactory.CreateProxy(descriptor.Implementation,descriptor.SourceType);
+                    var proxyObject = proxyFactory.CreateProxy(descriptor.Implementation.GetType().Name, descriptor.SourceType);
                     //it'll return proxy object as descriptor.Implementation
                     return proxyObject;
                 }
                 else
                 {
                     descriptor.Implementation = Activator.CreateInstance(descriptor.ImplementationType);
-                    var proxyObject = proxyFactory.CreateProxy(descriptor.Implementation,descriptor.SourceType);
+                    var proxyObject = proxyFactory.CreateProxy(descriptor.Implementation.GetType().Name, descriptor.SourceType);
                     return proxyObject;
                 }
 

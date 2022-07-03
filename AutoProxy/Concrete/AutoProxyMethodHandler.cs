@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -17,6 +18,11 @@ namespace AutoProxy.Concrete
         //Moreover we can use to interceptor method with business logic at the same time
         public void Handle(object[] argsObject)
         {
+            StackTrace st = new StackTrace(true);
+            var frame = st.GetFrame(1);
+            var proxyMethod = frame.GetMethod();
+            
+            
             
         }
         public static AutoProxyMethodHandler GetHandler()
