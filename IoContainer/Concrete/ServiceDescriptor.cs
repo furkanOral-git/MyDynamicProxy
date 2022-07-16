@@ -9,15 +9,16 @@ namespace IoContainer.Concrete
         public object Implementation { get; set; }
         public Type ImplementationType { get; init; }
         public Type SourceType { get; init; }
-
-        public ServiceDescriptor(Type implementationType,Type sourceType) 
+        public bool ProxyUsage { get; set; }
+        public ServiceDescriptor(Type implementationType,Type sourceType,bool proxyUsage) 
         {
             ImplementationType = implementationType;
             SourceType = sourceType;
+            ProxyUsage = proxyUsage;
         }
         
         // Don't repeat yourself
-        public ServiceDescriptor(Type implementationType) : this(implementationType,implementationType)
+        public ServiceDescriptor(Type implementationType,bool proxyUsage) : this(implementationType,implementationType,proxyUsage)
         {
             
         }

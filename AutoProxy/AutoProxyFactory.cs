@@ -1,11 +1,11 @@
 using System.Reflection.Emit;
 using System.Reflection;
 using AutoProxy.Concrete;
-using AutoProxy.Tools;
+using AutoProxy.Abstract;
 
 namespace AutoProxy
 {
-    public class AutoProxyFactory
+    public class AutoProxyFactory : IAutoProxyFactory, IDescriptorContainer
     {
         private static AutoProxyFactory _factory;
         private AssemblyBuilder _assemblyBuilder;
@@ -16,7 +16,7 @@ namespace AutoProxy
             if (_assemblyBuilder == null)
             {
                 AssemblyName assemblyName = new AssemblyName("VirtualAssembly");
-                AssemblyBuilder assembly = AssemblyBuilder.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
+                _assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
 
             }
             if (_moduleBuilder == null && _assemblyBuilder != null)
@@ -36,65 +36,97 @@ namespace AutoProxy
             }
             return _factory;
         }
-        public object CreateProxy(object implementation, Type SourceType)
-        {
-            var MainClassName = implementation.GetType().Name;
-            //Type, Implementation, Field ,Constructor describing
-            var typeBuilder = _moduleBuilder.DefineType($"{MainClassName}Proxy");
-            typeBuilder.AddInterfaceImplementation(SourceType);
-            var field = typeBuilder.DefineField("_methodHandler", typeof(AutoProxyMethodHandler), FieldAttributes.Private);
-            var constructor = typeBuilder.DefineConstructor(MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName, CallingConventions.Any, null);
-            var methods = ImplementMethods(SourceType, typeBuilder);
-            AutoProxyEmitter.EmitType(typeBuilder, constructor, field, methods);
 
-            //Create Type object from Typebuilder, this is final operation for generate a proxy class
-            var proxyTypeConcrete = typeBuilder.CreateType();
-            //Creates descriptor object for proxy
-            CreateDescriptor(SourceType, implementation);
-            //Singleton or transient
-            return Activator.CreateInstance(proxyTypeConcrete);
+        public ProxyDescriptor GetProxyDescriptor(Type proxyType)
+        {
+            return _proxies.FirstOrDefault(proxy => proxy.ProxyType == proxyType);
         }
-        private MethodBuilder[] ImplementMethods(Type SourceType, TypeBuilder builder)
+        public object GetProxy(object implementation, Type SourceType)
         {
-            var methods = SourceType.GetMethods();
-            MethodBuilder[] proxyMethods = new MethodBuilder[methods.Length];
+            var implementationType = implementation.GetType();
+            var constantHandleObject = AutoProxyMethodHandler.GetHandler();
 
+            if (_proxies.Any(proxy => proxy.ImplementationType == implementationType || proxy.SourceType == SourceType) == false)
+            {
+                var proxyType = CreateProxyType(implementationType, SourceType);
+                var descriptor = CreateDescriptor(SourceType, proxyType, implementation);
+                descriptor.ProxyObject = Activator.CreateInstance(proxyType, constantHandleObject);
+                return descriptor.ProxyObject;
+            }
+            else
+            {
+                var descriptor = _proxies.FirstOrDefault(proxy => proxy.ImplementationType == implementationType);
+
+                if (descriptor.ProxyObject == null)
+                {
+                    descriptor.ProxyObject = Activator.CreateInstance(descriptor.ProxyType, constantHandleObject);
+                }
+                return descriptor.ProxyObject;
+            }
+        }
+        private Type CreateProxyType(Type implementationType, Type SourceType)
+        {
+            var MainClassName = implementationType.Name;
+            //Type, Implementation, Field ,Constructor describing
+            var typeBuilder = _moduleBuilder.DefineType($"{MainClassName}Proxy"
+            , TypeAttributes.Public | TypeAttributes.AutoClass | TypeAttributes.AnsiClass | TypeAttributes.BeforeFieldInit
+            , typeof(Object));
+
+            typeBuilder.AddInterfaceImplementation(SourceType);
+
+            var field = typeBuilder.DefineField("_methodHandler", typeof(AutoProxyMethodHandler), FieldAttributes.Private);
+
+            var constructor = typeBuilder.DefineConstructor(
+                MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName
+                , CallingConventions.HasThis
+                , new Type[] { typeof(AutoProxyMethodHandler) });
+
+            constructor.DefineParameter(1, ParameterAttributes.None, "methodHandler");
+            constructor.SetImplementationFlags(MethodImplAttributes.IL);
+            AutoProxyEmitter.EmitConstructor(constructor, field);
+
+            var handleMethod = typeof(AutoProxyMethodHandler).GetMethod("Handle");
+            var methods = SourceType.GetMethods();
             for (int i = 0; i < methods.Length; i++)
             {
-                var definedMethod = builder.DefineMethod(methods[i].Name, MethodAttributes.Public | MethodAttributes.Final | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual);
-                var parameters = methods[i].GetParameters();
-                if (parameters != null)
-                {
-                    for (int index = 0; i < parameters.Length; i++)
-                    {
-                        definedMethod.DefineParameter(index, ParameterAttributes.In, parameters[i].Name);
-                    }
-                }
-                proxyMethods[i] = definedMethod;
-
+                var definedMethod = ImplementMethod(typeBuilder, methods[i]);
+                AutoProxyEmitter.EmitMethod(definedMethod, field, methods[i], handleMethod);
             }
-            return proxyMethods;
+
+            var proxyTypeConcrete = typeBuilder.CreateType();
+
+            //Create Type object from Typebuilder, this is final operation for generate a proxy class
+            return proxyTypeConcrete;
+
         }
-        private void CreateDescriptor(Type sourceType, object implementationObject)
+        private MethodBuilder ImplementMethod(TypeBuilder builder, MethodInfo actualMethod)
         {
+            var definedMethod = builder.DefineMethod(actualMethod.Name
+                , MethodAttributes.Public | MethodAttributes.Final | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual
+                , CallingConventions.HasThis
+                , actualMethod.ReturnType
+                , actualMethod.GetParameters().Select(p => p.ParameterType).ToArray());
 
-            if (_proxies.Any(proxy => proxy.SourceType != sourceType))
+            definedMethod.SetImplementationFlags(MethodImplAttributes.IL);
+            return definedMethod;
+        }
+
+        private ProxyDescriptor CreateDescriptor(Type sourceType, Type proxyType, object implementationObject)
+        {
+            Type ImpType = implementationObject.GetType();
+
+            List<MethodInvocation> invs = new List<MethodInvocation>();
+            var methods = sourceType.GetMethods();
+            for (int i = 0; i < methods.Length; i++)
             {
-                List<MethodInvocation> invs = new List<MethodInvocation>();
-                Type ImpType = implementationObject.GetType();
-                var methods = ImpType.GetMethods().Where(method => method.DeclaringType == ImpType).ToArray();
-                for (int i = 0; i < methods.Length; i++)
-                {
-                    if (invs.Any(inv => inv.Method != methods[i] && inv.DeclaringObject.GetType() != ImpType))
-                    {
-                        var inv = new MethodInvocation(methods[i], implementationObject);
-                        invs.Add(inv);
-                    }
-                }
-                var descriptor = new ProxyDescriptor(sourceType, invs);
-                _proxies.Add(descriptor);
-
+                var inv = new MethodInvocation(methods[i], implementationObject);
+                invs.Add(inv);
             }
+            var descriptor = new ProxyDescriptor(sourceType, implementationObject, proxyType, invs);
+            _proxies.Add(descriptor);
+            return descriptor;
+
+
         }
     }
 }

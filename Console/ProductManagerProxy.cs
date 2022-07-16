@@ -8,9 +8,9 @@ namespace Console
     {
         private AutoProxyMethodHandler _methodHandler;
         
-        public ProductManagerProxy()
+        public ProductManagerProxy(AutoProxyMethodHandler methodHandler)
         {
-           _methodHandler = AutoProxyMethodHandler.GetHandler();
+           _methodHandler = methodHandler;
         }
 
         public void AddProduct(Product product)

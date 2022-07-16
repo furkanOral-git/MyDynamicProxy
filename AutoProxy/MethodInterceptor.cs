@@ -1,6 +1,6 @@
 using AutoProxy.Abstract;
 
-namespace AutoProxy.Concrete
+namespace AutoProxy
 {
     public  class MethodInterceptor : AbstractInterceptorBase
     {

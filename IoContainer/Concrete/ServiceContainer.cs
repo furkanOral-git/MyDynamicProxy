@@ -40,33 +40,60 @@ namespace IoContainer.Concrete
         {
             return Descriptors;
         }
-        //This method only fill Implementation. It'll not produce instance as transient
+        //This method only return implementation or gets a proxy object. It'll not produce instance as transient
         private object GetServiceBase(Type SourceType, object[]? param = null)
         {
-            var proxyFactory = AutoProxyFactory.GetFactory();
             var descriptor = Descriptors.SingleOrDefault(descriptor => descriptor.SourceType == SourceType || descriptor.ImplementationType == SourceType);
-            //var Methods = descriptor.ImplementationType.GetMethods().Where(method=>method.DeclaringType == descriptor.ImplementationType);
+            
             if (descriptor.Implementation == null)
             {
                 if (param != null)
                 {
-                    //AutoProxy'll integrate from here
+                    
+                    object returnObject = null;
                     descriptor.Implementation = Activator.CreateInstance(descriptor.ImplementationType, param);
-                    var proxyObject = proxyFactory.CreateProxy(descriptor.Implementation.GetType().Name, descriptor.SourceType);
-                    //it'll return proxy object as descriptor.Implementation
-                    return proxyObject;
+                    //AutoProxy integrated with proxyUsage property
+                    if(descriptor.ProxyUsage)
+                    {
+                        var proxyFactory = AutoProxyFactory.GetFactory();
+                        returnObject = proxyFactory.GetProxy(descriptor.Implementation,descriptor.SourceType);
+                    }
+                    else
+                    {
+                        returnObject = descriptor.Implementation;
+                    }
+                     
+                    return returnObject;
                 }
                 else
                 {
+                    object returnObject = null;
                     descriptor.Implementation = Activator.CreateInstance(descriptor.ImplementationType);
-                    var proxyObject = proxyFactory.CreateProxy(descriptor.Implementation.GetType().Name, descriptor.SourceType);
-                    return proxyObject;
+
+                    if(descriptor.ProxyUsage)
+                    {
+                        var proxyFactory = AutoProxyFactory.GetFactory();
+                        returnObject = proxyFactory.GetProxy(descriptor.Implementation, SourceType);
+                    }
+                    else
+                    {
+                        returnObject = descriptor.Implementation;
+                    }
+                    return returnObject;
                 }
 
             }
             else
             {
-                return descriptor.Implementation;
+                if(descriptor.ProxyUsage)
+                {
+                    var proxyFactory = AutoProxyFactory.GetFactory();
+                    return proxyFactory.GetProxy(descriptor.Implementation,descriptor.SourceType);
+                }
+                else
+                {
+                    return descriptor.Implementation;
+                }
             }
         }
 

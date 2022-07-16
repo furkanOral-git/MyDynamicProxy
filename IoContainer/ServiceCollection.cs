@@ -10,7 +10,7 @@ namespace IoContainer
 
         private ServiceCollection()
         {
-            
+
         }
         public IServiceContainer InitContainer()
         {
@@ -30,8 +30,8 @@ namespace IoContainer
             }
             return _instance;
         }
-        
-        public void RegisterAsSingleton<TService>() where TService : class, new()
+
+        public void RegisterAsSingleton<TService>(bool proxyUsage) where TService : class, new()
         {
             var descriptors = _containerInstance.GetDescriptors();
             bool IsExist = descriptors.Any(descriptor => descriptor.ImplementationType == typeof(TService) && descriptor.SourceType == typeof(TService));
@@ -39,14 +39,15 @@ namespace IoContainer
             if (IsExist)
             {
                 System.Console.WriteLine("Service Provider : This service has already registered !");
+
             }
             else
             {
-                descriptors.Add(new ServiceDescriptor(typeof(TService)));
+                descriptors.Add(new ServiceDescriptor(typeof(TService), proxyUsage));
             }
         }
 
-        public void RegisterAsSingleton<TSource, TService>() where TService : class, TSource
+        public void RegisterAsSingleton<TSource, TService>(bool proxyUsage) where TService : class, TSource
         {
             var descriptors = _containerInstance.GetDescriptors();
             bool IsExist = descriptors.Any(descriptor => descriptor.ImplementationType == typeof(TService) && descriptor.SourceType == typeof(TSource));
@@ -57,7 +58,7 @@ namespace IoContainer
             }
             else
             {
-                descriptors.Add(new ServiceDescriptor(typeof(TService), typeof(TSource)));
+                descriptors.Add(new ServiceDescriptor(typeof(TService), typeof(TSource), proxyUsage));
             }
         }
     }
