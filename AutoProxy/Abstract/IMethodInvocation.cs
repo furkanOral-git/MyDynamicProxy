@@ -7,6 +7,6 @@ namespace AutoProxy.Abstract
 {
     public interface IMethodInvocation
     {
-        object? Process();
+        void Process(object[]? args);
     }
 }

@@ -3,35 +3,11 @@ using AutoProxy.Abstract;
 
 namespace AutoProxy.Concrete
 {
-    public class MethodInvocation : IMethodInvocation
+    public class MethodInvocation : AbstractMethodInvocation
     {
-        public MethodInfo Method { get; init; }
-        public object DeclaringObject { get; init; }
-        public object[] MethodParameterObjects { get; set; }
-
-        public MethodInvocation(MethodInfo method,object declaringObject,object[]? parameterObjects = null)
+        public MethodInvocation(MethodInfo method, object declaringObject) : base(method, declaringObject)
         {
-            Method = method;
-            DeclaringObject = declaringObject;
-            MethodParameterObjects = parameterObjects;
-        }
-        public object? Process()
-        {
-            try
-            {
-                if(MethodParameterObjects != null){
-
-                    return Method.Invoke(DeclaringObject, MethodParameterObjects);
-                }
-                else
-                {
-                    return Method.Invoke(DeclaringObject,null);
-                }
-            }
-            catch (System.Exception e)
-            {
-                throw e;
-            }
+            
         }
     }
 }
